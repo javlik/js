@@ -8,9 +8,9 @@
     <script>
         var foo;
         document.addEventListener("DOMContentLoaded", function() {
-            document.writeln("loading: success<br>");
+            //document.writeln("loading: success<br>");
             if (turbojs) {
-                document.writeln("turbojs init: success<br>");
+                //document.writeln("turbojs init: success<br>");
                 foo = turbojs.alloc(1e5);
                 for(var i = 0; i < 1e5; ++i) {
                     foo.data[i] = i;
@@ -33,11 +33,15 @@
                     //commit(vec4(result + d.r, result + d.g, result + d.b, result + d.a));
                     commit(vec4(d + accum));
                 }
-                `);
+                `, true);
+                var placeholder = document.getElementById("placeholder");
+                placeholder.innerHTML = foo.data[200000];
             }
         });
     </script>
 </head>
 
-<body></body>
+<body>
+<div id="placeholder"></div>
+</body>
 </html>

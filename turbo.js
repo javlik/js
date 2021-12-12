@@ -101,8 +101,11 @@
 		var stdlib1 =
 		"void processVec4(vec4); // prototype for the 'callback' func.\n" +
 		"void processAll(){\n" +
+		  "int cntr = 0;\n" +
 		  "for(float i = 0.; i < 1.; i += STEP){\n" +
-			"for(float j = 0.; j < 1.; j += STEP){\n" +
+			"for(float j = 0.; j < 1.; j += STEP){\n";
+
+		var stdlib2 =
 			  "processVec4(texture2D(u_texture, vec2(j, i)));\n" +
 			"}\n" +
 			"continue;\n" +
@@ -143,14 +146,17 @@
 
 	return {
 		// run code against a pre-allocated array
-		run : function(ipt, code) {
+		run : function(ipt, code, tobreak) {
 			var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
 			var size = Math.sqrt(ipt.data.length) / 4;
 
-			var definitions = 	"\n#define STEP " + (1.0 / size).toString() + "\n"
+			var step = (1.0 / size).toString();
+			var barrier = (ipt.length).toString();
+			var definitions = "\n#define STEP " + step + "\n";
+			var breakstring = "if (++cntr > " + barrier + ") break;\n";
 
-			var stdlib = stdlib0 + definitions + stdlib1;
+			var stdlib = stdlib0 + definitions + stdlib1 + (tobreak ? breakstring : "") + stdlib2;
 
 			gl.shaderSource(
 				fragmentShader,
