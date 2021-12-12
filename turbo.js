@@ -57,31 +57,33 @@
 	var indexBuffer    = newBuffer([  1,  2, 0,  3, 0, 2 ], Uint16Array, gl.ELEMENT_ARRAY_BUFFER);
 
 	var vertexShaderCode =
-	"attribute vec2 position;\n" +
-	"varying vec2 pos;\n" +
-	"attribute vec2 texture;\n" +
-	"\n" +
-	"void main(void) {\n" +
-	"  pos = texture;\n" +
-	"  gl_Position = vec4(position.xy, 0.0, 1.0);\n" +
-	"}"
+		"attribute vec2 position;\n" +
+		"varying vec2 pos;\n" +
+		"attribute vec2 texture;\n" +
+		"\n" +
+		"void main(void) {\n" +
+		"  pos = texture;\n" +
+		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n" +
+		"}"
 
 	var stdlib =
-	"\n" +
-	"precision mediump float;\n" +
-	"uniform sampler2D u_texture;\n" +
-	"varying vec2 pos;\n" +
-	"\n" +
-	"vec4 read(void) {\n" +
-	"  return texture2D(u_texture, pos);\n" +
-	"}\n" +
-	"\n" +
-	"void commit(vec4 val) {\n" +
-	"  gl_FragColor = val;\n" +
-	"}\n" +
-	"\n" +
-	"// user code begins here\n" +
-	"\n"
+		"\n" +
+		"precision highp float;\n" +
+		"uniform sampler2D u_texture;\n" +
+		"uniform vec2 res;\n" +
+		"varying vec2 pos;\n" +
+		"\n" +
+		"vec4 read(void) {\n" +
+		" return texture2D(u_texture, pos);\n" +
+		"}\n" +
+		"\n" +
+		"void commit(vec4 val) {\n" +
+		"  gl_FragColor = val;\n" +
+		"}\n" +
+		"\n" +
+		"// user code begins here\n" +
+		"\n";
+
 
 	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
 
@@ -117,9 +119,13 @@
 		run : function(ipt, code) {
 			var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
+			var size = Math.sqrt(ipt.data.length) / 4;
+
+			var definitions = 	"\n#define STEP " + (1.0 / size).toString() + "\n"
+
 			gl.shaderSource(
 				fragmentShader,
-				stdlib + code
+				stdlib + definitions + code
 			);
 
 			gl.compileShader(fragmentShader);
@@ -147,15 +153,18 @@
 			if (!gl.getProgramParameter(program, gl.LINK_STATUS))
 				throw new Error('turbojs: Failed to link GLSL program code.');
 
+			var vRes = gl.getUniformLocation(program, 'res');
 			var uTexture = gl.getUniformLocation(program, 'u_texture');
 			var aPosition = gl.getAttribLocation(program, 'position');
 			var aTexture = gl.getAttribLocation(program, 'texture');
 
 			gl.useProgram(program);
 
-			var size = Math.sqrt(ipt.data.length) / 4;
+
+
 			var texture = createTexture(ipt.data, size);
 
+			;
 			gl.viewport(0, 0, size, size);
 			gl.bindFramebuffer(gl.FRAMEBUFFER, gl.createFramebuffer());
 
@@ -170,6 +179,8 @@
 			if (!frameBufferStatus)
 				throw new Error('turbojs: Error attaching float texture to framebuffer. Your device is probably incompatible. Error info: ' + frameBufferStatus.message);
 
+			console.log(`size: ${size}`)
+			gl.uniform2f(vRes, size, size);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.uniform1i(uTexture, 0);
