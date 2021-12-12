@@ -15,36 +15,7 @@
                 for(var i = 0; i < 1e5; ++i) {
                     foo.data[i] = i;
                 };
-                var nFactor = 2;
-                turbojs.run(foo, `
-
-                float readAt(int idx) {
-                  int idxDivBy4 = idx / 4;
-                  int _color = idx - ((idxDivBy4) * 4); // int modulo;
-
-                  float y = mod(float(idxDivBy4), res.x);
-                  float x = float(idxDivBy4 / int(res.x));
-
-                  vec4 v4result = texture2D(u_texture, vec2(y / res.y, x / res.x));
-
-                  if (_color == 0) return v4result.r;
-                  else if (_color == 1) return v4result.g;
-                  else if (_color == 2) return v4result.b;
-                  else if (_color == 3) return v4result.a;
-                  else return 0.;
-                }
-
-
-
-                void processVec4(vec4); // prototype for the "callback" func.
-                void processAll(){
-                  for(float i = 0.; i < 1.; i += STEP){
-                    for(float j = 0.; j < 1.; j += STEP){
-                      processVec4(texture2D(u_texture, vec2(j, i)));
-                    }
-                    continue;
-                  }
-                }
+                turbojs.run(foo,`
 
                 float accum = 0.;
 

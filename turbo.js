@@ -66,7 +66,7 @@
 		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n" +
 		"}"
 
-	var stdlib =
+	var stdlib0 =
 		"\n" +
 		"precision highp float;\n" +
 		"uniform sampler2D u_texture;\n" +
@@ -81,6 +81,33 @@
 		"  gl_FragColor = val;\n" +
 		"}\n" +
 		"\n" +
+		"float readAt(int idx) {\n" +
+		  "int idxDivBy4 = idx / 4;\n" +
+		  "int _color = idx - ((idxDivBy4) * 4); // int modulo;\n" +
+
+		  "float y = mod(float(idxDivBy4), res.x);\n" +
+		  "float x = float(idxDivBy4 / int(res.x));\n" +
+
+		  "vec4 v4result = texture2D(u_texture, vec2(y / res.y, x / res.x));\n" +
+
+		  "if (_color == 0) return v4result.r;\n" +
+		  "else if (_color == 1) return v4result.g;\n" +
+		  "else if (_color == 2) return v4result.b;\n" +
+		  "else if (_color == 3) return v4result.a;\n" +
+		  "else return 0.;\n" +
+		"}\n";
+
+
+		var stdlib1 =
+		"void processVec4(vec4); // prototype for the 'callback' func.\n" +
+		"void processAll(){\n" +
+		  "for(float i = 0.; i < 1.; i += STEP){\n" +
+			"for(float j = 0.; j < 1.; j += STEP){\n" +
+			  "processVec4(texture2D(u_texture, vec2(j, i)));\n" +
+			"}\n" +
+			"continue;\n" +
+		  "}\n" +
+		"}\n" +
 		"// user code begins here\n" +
 		"\n";
 
@@ -123,9 +150,11 @@
 
 			var definitions = 	"\n#define STEP " + (1.0 / size).toString() + "\n"
 
+			var stdlib = stdlib0 + definitions + stdlib1;
+
 			gl.shaderSource(
 				fragmentShader,
-				stdlib + definitions + code
+				stdlib + code
 			);
 
 			gl.compileShader(fragmentShader);
