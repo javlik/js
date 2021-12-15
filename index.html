@@ -14,10 +14,11 @@
                 foo = turbojs.alloc(1e5);
                 for(var i = 0; i < 1e5; ++i) {
                     foo.data[i] = i;
-                };
+                }
                 turbojs.run(foo,`
 
                 float accum = 0.;
+                vec4 msin;
 
                 void processVec4(vec4 val){
                     accum += sin(val.r) + sin(val.g) + sin(val.b) + sin(val.a);
@@ -25,17 +26,13 @@
 
                 void main()
                 {
-                    float result = 0.;
-                    vec4 d = read();
                     processAll();
 
-                    result = accum;
-                    //commit(vec4(result + d.r, result + d.g, result + d.b, result + d.a));
-                    commit(vec4(d + accum));
+                    commit(vec4(accum));
                 }
                 `, true);
                 var placeholder = document.getElementById("placeholder");
-                placeholder.innerHTML = foo.data[200000];
+                placeholder.innerHTML = foo.data[0];
             }
         });
     </script>
